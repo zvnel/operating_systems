@@ -1,0 +1,40 @@
+#include <security/pam_appl.h> 
+#include <security/pam_misc.h> 
+#include <stdio.h> 
+#include <stdlib.h> 
+
+ 
+// PAM-конверсия для взаимодействия с пользователем 
+static struct pam_conv conv = { 
+    misc_conv, 
+    NULL 
+}; 
+ 
+int main() { 
+    pam_handle_t *pamh = NULL; 
+    int retval; 
+    const char *username = NULL; 
+ 
+    // Инициализация PAM 
+    retval = pam_start("pam_test", username, &conv, &pamh); 
+    if (retval != PAM_SUCCESS) { 
+        fprintf(stderr, "Ошибка инициализации PAM: %s\n", pam_strerror(pamh, retval)); 
+        return EXIT_FAILURE; 
+    } 
+ 
+    // Аутентификация пользователя 
+    retval = pam_authenticate(pamh, 0); 
+    if (retval == PAM_SUCCESS) { 
+        printf("Аутентификация успешна.\n"); 
+    } else { 
+        printf("Ошибка аутентификации: %s\n", pam_strerror(pamh, retval)); 
+    } 
+ 
+    // Завершение PAM-сессии 
+    if (pam_end(pamh, retval) != PAM_SUCCESS) { 
+        fprintf(stderr, "Ошибка завершения PAM: %s\n", pam_strerror(pamh, retval)); 
+        return EXIT_FAILURE; 
+    } 
+ 
+    return (retval == PAM_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE; 
+}
