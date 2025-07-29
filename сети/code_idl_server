@@ -1,0 +1,22 @@
+#include "IDL.h" 
+#include <stdio.h> 
+#include <string.h> 
+ 
+int check_credentials(const char *username, const char *password) { 
+    return (strcmp(username, "admin") == 0 && strcmp(password, "password") == 0); 
+} 
+ 
+auth_response *authenticate_1_svc(auth_request *req, struct svc_req *rqstp) { 
+    static auth_response result; 
+ 
+    // Проверка имени пользователя и пароля 
+    if (check_credentials(req->username, req->password)) { 
+        result.success = 1; 
+        strncpy(result.message, "Authenticated", sizeof(result.message)); 
+    } else { 
+        result.success = 0; 
+        strncpy(result.message, "Invalid credentials", sizeof(result.message)); 
+    } 
+ 
+    return &result; 
+}
