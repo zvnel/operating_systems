@@ -1,0 +1,36 @@
+global _start
+
+section .data
+    virt: db "Virtual box",10
+    length1: equ $-virt
+    phys: db "Physical machine",10
+    length2: equ $-phys
+
+section .text
+_start:
+    xor eax, eax
+	mov eax, 0x40000000
+	cpuid
+	cmp ebx, 0x4b4d564b  ; соответствует строке "KVMK"
+
+	jne physical
+
+	;virtual
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, virt
+	mov edx, length1
+	int 0x80
+
+	jmp exit
+
+physical:
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, phys
+	mov edx, length2
+	int 0x80
+exit:
+	mov ebx, 0
+	mov eax, 1
+	int 0x80
