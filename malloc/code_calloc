@@ -1,0 +1,20 @@
+#include <stdlib.h>
+#include <time.h>
+
+int main() {
+    FILE* file = fopen("calloc.txt", "w");
+
+    for (int count = 2; count <= 268435456; count *= 2) {
+        clock_t start = clock();
+        int* ptr = (int*)calloc(count, sizeof(int));
+        clock_t end = clock();
+        double time = (double)(end - start) / CLOCKS_PER_SEC;
+
+        printf("calloc %lu %f\n", count * sizeof(int), time);
+        fprintf(file, "calloc %lu %f\n", count * sizeof(int), time);
+
+        free(ptr);
+    }
+    fclose(file);
+    return 0;
+}
