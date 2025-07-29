@@ -1,0 +1,62 @@
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+#include <security/pam_modules.h> 
+#include <security/pam_appl.h> 
+#include <security/pam_misc.h> 
+ 
+// Список допустимых пользователей 
+const char *valid_users[] = {"user1", "user2", "user3"}; 
+ 
+// Проверка существования пользователя 
+int user_exists(const char *user) { 
+    for (int i = 0; i < sizeof(valid_users) / sizeof(valid_users[0]); i++) { 
+        if (strcmp(user, valid_users[i]) == 0) { 
+            return 1; // Пользователь найден 
+        } 
+    } 
+    return 0; // Пользователь не найден 
+} 
+ 
+PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv) { 
+    int retval; 
+    const char *user; 
+ 
+    // Получаем имя пользователя 
+    retval = pam_get_user(pamh, &user, "Введите имя пользователя: "); 
+    if (retval != PAM_SUCCESS || user == NULL) { 
+        fprintf(stderr, "Ошибка получения имени пользователя.\n"); 
+        return PAM_AUTH_ERR; 
+    } 
+ 
+    // Проверяем, существует ли пользователь 
+    if (!user_exists(user)) { 
+        fprintf(stderr, "Пользователь '%s' не найден в системе.\n", user); 
+        return PAM_AUTH_ERR; 
+    } 
+ 
+    // Задаём вопрос с фразой 
+    printf("Привет, %s! Введите контрольную фразу для доступа: \n", user); 
+    char answer[256]; 
+    // Чтение строки, включая пробелы 
+    if (fgets(answer, sizeof(answer), stdin) == NULL) { 
+        printf("Ошибка при вводе.\n"); 
+        return PAM_AUTH_ERR; 
+    } 
+ 
+    // Убираем символ новой строки в конце строки 
+    answer[strcspn(answer, "\n")] = '\0'; 
+ 
+    // Проверяем правильность ответа 
+    if (strcmp(answer, "лабораторнаяработа8") == 0) { 
+        printf("Ответ верный. Доступ разрешён.\n"); 
+        return PAM_SUCCESS; 
+    } else { 
+        printf("Ответ неверный. Доступ запрещён.\n"); 
+        return PAM_AUTH_ERR; 
+    } 
+} 
+ 
+PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv) { 
+    return PAM_SUCCESS; 
+}
