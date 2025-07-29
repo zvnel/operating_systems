@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <time.h>
+#include <gperftools/tcmalloc.h>
+
+int main() {
+    FILE *file = fopen("malloc.txt", "w");
+
+    for (int count = 2; count <= 268435456; count = count * 2) {
+        clock_t start = clock();
+        int* ptr = (int*) tc_malloc(count * sizeof(int));
+        clock_t end = clock();
+        double time = (double)(end - start) / CLOCKS_PER_SEC;
+
+        printf("tcmalloc %lu %f\n", count * sizeof(int), time);
+        fprintf(file, "tcmalloc %lu %f\n", count * sizeof(int), time);
+
+        tc_free(ptr);
+    }
+    fclose(file);
+    return 0;
+}
