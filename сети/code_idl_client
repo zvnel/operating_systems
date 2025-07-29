@@ -1,0 +1,49 @@
+#include "IDL.h" 
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+ 
+int main(int argc, char *argv[]) { 
+    CLIENT *clnt; 
+    char *server; 
+    auth_request req; 
+    auth_response *res; 
+ 
+    if (argc < 2) { 
+        printf("Usage: %s <server_host>\n", argv[0]); 
+        exit(1); 
+    } 
+ 
+    server = argv[1]; 
+ 
+    printf("Enter username: "); 
+    scanf("%s", req.username); 
+ 
+    printf("Enter password: "); 
+    scanf("%s", req.password); 
+ 
+    // Создание клиента 
+    clnt = clnt_create(server, AUTH_PROG, AUTH_VERS, "udp"); 
+    if (clnt == NULL) { 
+        clnt_pcreateerror(server); 
+        exit(1); 
+    } 
+ 
+    // Вызов удалённой процедуры 
+    res = authenticate_1(&req, clnt); 
+    if (res == NULL) { 
+        clnt_perror(clnt, server); 
+        clnt_destroy(clnt); 
+        exit(1); 
+    } 
+ 
+    // Вывод результата 
+    if (res->success) { 
+        printf("Server response: %s\n", res->message); 
+    } else { 
+        printf("Server response: %s\n", res->message); 
+    } 
+ 
+    clnt_destroy(clnt); 
+    return 0; 
+}
