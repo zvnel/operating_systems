@@ -1,0 +1,20 @@
+#include <time.h>
+#include <jemalloc/jemalloc.h>
+
+int main() {
+    FILE *file = fopen("malloc.txt", "w");
+
+    for (int count = 2; count <= 268435456; count = count * 2) {
+        clock_t start = clock();
+        int* ptr = (int*)malloc(count * sizeof(int));
+        clock_t end = clock();
+        double time = (double)(end - start) / CLOCKS_PER_SEC;
+
+        printf("jemalloc %lu %f\n", count * sizeof(int), time);
+        fprintf(file, "jemalloc %lu %f\n", count * sizeof(int), time);
+
+        free(ptr);
+    }
+    fclose(file);
+    return 0;
+}
